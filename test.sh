@@ -4,7 +4,7 @@ if [ $# -eq 0 ]; then
 else
     OPTS=-Doptimize=$1
 fi
-#zig build
+zig build $OPTS
 for i in src/*_test.zig; do
     zig test $OPTS $i -lrav1e -lc
 done
