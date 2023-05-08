@@ -33,27 +33,29 @@ pub const AV1Enc = struct {
             .encoder = undefined,
         };
         var config: ?*rav1e.RaConfig = rav1e.rav1e_config_default();
-        if (config == null) {
+        if (config) |c| {
+            self.config = c;
+        } else {
             log.err("Failed to create config", .{});
             return error.FailedToCreateConfig;
         }
-        self.config = config.?;
 
         _ = rav1e.rav1e_config_parse_int(config, "width", @intCast(c_int, width));
         _ = rav1e.rav1e_config_parse_int(config, "height", @intCast(c_int, height));
         _ = rav1e.rav1e_config_parse_int(config, "key_frame_interval", @intCast(c_int, keyframe_interval));
-        //_ = rav1e.rav1e_config_parse_int(config, "bitrate", bitrate);
+        _ = rav1e.rav1e_config_parse_int(config, "bitrate", @intCast(c_int, bitrate));
         _ = rav1e.rav1e_config_parse_int(config, "speed", 9);
         if (0 != rav1e.rav1e_config_parse(config, "low_latency", "true")) {
             log.err("Failed to config low_latency", .{});
         }
 
         var encoder: ?*rav1e.RaContext = rav1e.rav1e_context_new(config);
-        if (encoder == null) {
+        if (encoder) |e| {
+            self.encoder = e;
+        } else {
             log.err("Failed to create encoder", .{});
             return error.FailedToCreateEncoder;
         }
-        self.encoder = encoder.?;
         return self;
     }
 
@@ -62,7 +64,7 @@ pub const AV1Enc = struct {
         rav1e.rav1e_config_unref(self.config);
     }
 
-    pub fn sendFrame(self: *Self, frame_data: []const u8, cb: *const fn([]const u8)void) !void {
+    pub fn sendFrame(self: *Self, frame_data: []const u8, cb: *const fn ([]const u8) void) !void {
         const frame = rav1e.rav1e_frame_new(self.encoder);
         if (frame == null) {
             log.err("Failed to create frame", .{});
@@ -87,13 +89,15 @@ pub const AV1Enc = struct {
             const sts = rav1e.rav1e_receive_packet(self.encoder, &packet);
 
             if (sts == rav1e.RA_ENCODER_STATUS_SUCCESS) {
-                cb(packet.?.data[0..packet.?.len]);
-                rav1e.rav1e_packet_unref(packet);
+                if (packet) |p| {
+                    cb(p.data[0..p.len]);
+                    rav1e.rav1e_packet_unref(packet);
+                }
             } else if (sts == rav1e.RA_ENCODER_STATUS_ENCODED) {
-                log.info("Encoded", .{});
+                //log.info("Encoded", .{});
                 continue;
             } else if (sts == rav1e.RA_ENCODER_STATUS_NEED_MORE_DATA) {
-                log.info("Need more data", .{});
+                //log.info("Need more data", .{});
                 break;
             } else {
                 log.err("Failed to receive packet: {}", .{sts});
@@ -101,8 +105,8 @@ pub const AV1Enc = struct {
             }
         }
     }
-    
-    pub fn flush(self: *Self, cb: *const fn([]const u8)void) !void {
+
+    pub fn flush(self: *Self, cb: *const fn ([]const u8) void) !void {
         const flush_status = rav1e.rav1e_send_frame(self.encoder, null);
         if (flush_status != rav1e.RA_ENCODER_STATUS_SUCCESS) {
             log.err("Failed to send null frame: {}", .{flush_status});
@@ -114,18 +118,20 @@ pub const AV1Enc = struct {
             const status = rav1e.rav1e_receive_packet(self.encoder, &packet);
 
             if (status == rav1e.RA_ENCODER_STATUS_SUCCESS) {
-                cb(packet.?.data[0..packet.?.len]);
-                rav1e.rav1e_packet_unref(packet);
+                if (packet) |p| {
+                    cb(p.data[0..p.len]);
+                    rav1e.rav1e_packet_unref(packet);
+                }
             } else if (status == rav1e.RA_ENCODER_STATUS_ENCODED) {
-                log.info("Encoded", .{});
+                //log.info("Encoded", .{});
                 continue;
             } else if (status == rav1e.RA_ENCODER_STATUS_LIMIT_REACHED) {
-                log.info("Limit reached", .{});
+                //log.info("Limit reached", .{});
                 break;
             } else {
                 log.err("Failed to receive packet: {}", .{status});
                 return error.FailedToReceivePacket;
             }
         }
-    }    
+    }
 };
