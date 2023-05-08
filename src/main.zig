@@ -2,6 +2,7 @@ const std = @import("std");
 const IVF = @import("ivf.zig");
 const AV1Enc = @import("av1enc.zig").AV1Enc;
 
+var running: bool = false;
 var frame_count: u32 = 0;
 var ivf_writer: IVF.IVFWriter = undefined;
 
@@ -37,7 +38,8 @@ pub fn I4202Av1(input_file: []const u8, output_file: []const u8, width: u32, hei
     var av1enc = try AV1Enc.init(width, height, framerate, time_scale, bitrate, keyframe_interval);
     defer av1enc.deinit();
 
-    while (true) {
+    running = true;
+    while (running) {
         if (yuv_size != try yuv_file.readAll(yuv_buf)) {
             break;
         }
@@ -47,8 +49,12 @@ pub fn I4202Av1(input_file: []const u8, output_file: []const u8, width: u32, hei
 }
 
 fn callback(encoded_data: []const u8) void {
+    if (!running) {
+        return;
+    }
     ivf_writer.writeIVFFrame(encoded_data, frame_count) catch |err| {
         std.debug.print("callback: {s}\n", .{@errorName(err)});
+        running = false;
     };
     frame_count += 1;
 }
