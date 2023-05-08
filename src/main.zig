@@ -5,7 +5,7 @@ const AV1Enc = @import("av1enc.zig").AV1Enc;
 var frame_count: u32 = 0;
 var ivf_writer: IVF.IVFWriter = undefined;
 
-pub fn I4202Av1(input_file: []const u8, output_file: []const u8, width: u16, height: u16, framerate: u32, bitrate: u32, keyframe_interval: u32) !void {
+pub fn I4202Av1(input_file: []const u8, output_file: []const u8, width: u32, height: u32, framerate: u32, bitrate: u32, keyframe_interval: u32) !void {
     const alc = std.heap.page_allocator;
 
     var yuv_file = try std.fs.cwd().openFile(input_file, .{});
@@ -20,8 +20,8 @@ pub fn I4202Av1(input_file: []const u8, output_file: []const u8, width: u16, hei
         .version = 0,
         .header_size = 32,
         .fourcc = .{ 'A', 'V', '0', '1' }, //"AV01",
-        .width = width,
-        .height = height,
+        .width = @intCast(u16, width),
+        .height = @intCast(u16, height),
         .frame_rate = framerate,
         .time_scale = time_scale,
         .num_frames = 0,
@@ -65,8 +65,8 @@ pub fn main() !void {
     }
     const input_file = std.mem.sliceTo(args[1], 0);
     const output_file = std.mem.sliceTo(args[2], 0);
-    const width = try std.fmt.parseInt(u16, args[3], 10);
-    const height = try std.fmt.parseInt(u16, args[4], 10);
+    const width = try std.fmt.parseInt(u32, args[3], 10);
+    const height = try std.fmt.parseInt(u32, args[4], 10);
     const framerate = try std.fmt.parseInt(u32, args[5], 10);
     const bitrate = try std.fmt.parseInt(u32, args[6], 10) * 1000;
     const keyframe_interval = try std.fmt.parseInt(u32, args[7], 10);
