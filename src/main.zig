@@ -53,7 +53,12 @@ fn callback(encoded_data: []const u8) void {
         return;
     }
     ivf_writer.writeIVFFrame(encoded_data, frame_count) catch |err| {
-        std.debug.print("callback: {s}\n", .{@errorName(err)});
+        switch (err) {
+            error.BrokenPipe => {},
+            else => {
+                std.log.err("frameHandle: {s}", .{@errorName(err)});
+            },
+        }
         running = false;
     };
     frame_count += 1;
