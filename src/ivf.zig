@@ -14,8 +14,8 @@ pub const IVFHeader = extern struct {
     fourcc: [4]u8, // Codec used (e.g., "VP80" for VP8, "VP90" for VP9)
     width: u16, // Width of the video in pixels
     height: u16, // Height of the video in pixels
-    frame_rate: u32, // Frame rate in Hz
-    time_scale: u32, // Time scale (number of time units per second, usually the same as frame rate)
+    framerate_num: u32, // The numerator of framerate
+    framerate_den: u32, // The denominator of framerate
     num_frames: u32, // Total number of frames in the file
     unused: u32, // Reserved for future use (set to 0)
 };

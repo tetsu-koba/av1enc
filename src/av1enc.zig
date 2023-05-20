@@ -5,8 +5,8 @@ const rav1e = @cImport(@cInclude("rav1e.h"));
 pub const AV1Enc = struct {
     width: u32,
     height: u32,
-    framerate: u32,
-    time_scale: u32,
+    framerate_num: u32,
+    framerate_den: u32,
     bitrate: u32,
     keyframe_interval: u32,
     config: *rav1e.RaConfig,
@@ -17,16 +17,16 @@ pub const AV1Enc = struct {
     pub fn init(
         width: u32,
         height: u32,
-        framerate: u32,
-        time_scale: u32,
+        framerate_num: u32,
+        framerate_den: u32,
         bitrate: u32,
         keyframe_interval: u32,
     ) !AV1Enc {
         var self = AV1Enc{
             .width = width,
             .height = height,
-            .framerate = framerate,
-            .time_scale = time_scale,
+            .framerate_num = framerate_num,
+            .framerate_den = framerate_den,
             .bitrate = bitrate,
             .keyframe_interval = keyframe_interval,
             .config = undefined,

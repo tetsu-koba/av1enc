@@ -15,7 +15,7 @@ pub fn I4202Av1(input_file: []const u8, output_file: []const u8, width: u32, hei
     var outfile = try std.fs.cwd().createFile(output_file, .{});
     defer outfile.close();
 
-    const time_scale: u32 = 1;
+    const framerate_den: u32 = 1;
     const ivf_header = IVF.IVFHeader{
         .signature = .{ 'D', 'K', 'I', 'F' },
         .version = 0,
@@ -23,8 +23,8 @@ pub fn I4202Av1(input_file: []const u8, output_file: []const u8, width: u32, hei
         .fourcc = .{ 'A', 'V', '0', '1' }, //"AV01",
         .width = @intCast(u16, width),
         .height = @intCast(u16, height),
-        .frame_rate = framerate,
-        .time_scale = time_scale,
+        .framerate_num = framerate,
+        .framerate_den = framerate_den,
         .num_frames = 0,
         .unused = 0,
     };
@@ -35,7 +35,7 @@ pub fn I4202Av1(input_file: []const u8, output_file: []const u8, width: u32, hei
     var yuv_buf = try alc.alloc(u8, yuv_size);
     defer alc.free(yuv_buf);
 
-    var av1enc = try AV1Enc.init(width, height, framerate, time_scale, bitrate, keyframe_interval);
+    var av1enc = try AV1Enc.init(width, height, framerate, framerate_den, bitrate, keyframe_interval);
     defer av1enc.deinit();
 
     running = true;
