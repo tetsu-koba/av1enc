@@ -69,8 +69,8 @@ pub fn main() !void {
         std.debug.print(usage, .{args[0]});
         std.os.exit(1);
     }
-    const input_file = std.mem.sliceTo(args[1], 0);
-    const output_file = std.mem.sliceTo(args[2], 0);
+    const input_file = args[1];
+    const output_file = args[2];
     const width = try std.fmt.parseInt(u32, args[3], 10);
     const height = try std.fmt.parseInt(u32, args[4], 10);
     const framerate = try std.fmt.parseInt(u32, args[5], 10);
