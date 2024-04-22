@@ -21,8 +21,8 @@ pub fn I4202Av1(input_file: []const u8, output_file: []const u8, width: u32, hei
         .version = 0,
         .header_size = 32,
         .fourcc = .{ 'A', 'V', '0', '1' }, //"AV01",
-        .width = @intCast(u16, width),
-        .height = @intCast(u16, height),
+        .width = @intCast(width),
+        .height = @intCast(height),
         .framerate_num = framerate,
         .framerate_den = framerate_den,
         .num_frames = 0,
@@ -32,7 +32,7 @@ pub fn I4202Av1(input_file: []const u8, output_file: []const u8, width: u32, hei
     defer ivf_writer.deinit();
 
     const yuv_size = width * height * 3 / 2;
-    var yuv_buf = try alc.alloc(u8, yuv_size);
+    const yuv_buf = try alc.alloc(u8, yuv_size);
     defer alc.free(yuv_buf);
 
     var av1enc = try AV1Enc.init(width, height, framerate, framerate_den, bitrate, keyframe_interval);
@@ -72,7 +72,7 @@ pub fn main() !void {
 
     if (args.len < 8) {
         std.debug.print(usage, .{args[0]});
-        std.os.exit(1);
+        std.posix.exit(1);
     }
     const input_file = args[1];
     const output_file = args[2];

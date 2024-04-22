@@ -32,7 +32,7 @@ pub const AV1Enc = struct {
             .config = undefined,
             .encoder = undefined,
         };
-        var config: ?*rav1e.RaConfig = rav1e.rav1e_config_default();
+        const config: ?*rav1e.RaConfig = rav1e.rav1e_config_default();
         if (config) |c| {
             self.config = c;
         } else {
@@ -40,16 +40,16 @@ pub const AV1Enc = struct {
             return error.FailedToCreateConfig;
         }
 
-        _ = rav1e.rav1e_config_parse_int(config, "width", @intCast(c_int, width));
-        _ = rav1e.rav1e_config_parse_int(config, "height", @intCast(c_int, height));
-        _ = rav1e.rav1e_config_parse_int(config, "key_frame_interval", @intCast(c_int, keyframe_interval));
-        _ = rav1e.rav1e_config_parse_int(config, "bitrate", @intCast(c_int, bitrate));
+        _ = rav1e.rav1e_config_parse_int(config, "width", @intCast(width));
+        _ = rav1e.rav1e_config_parse_int(config, "height", @intCast(height));
+        _ = rav1e.rav1e_config_parse_int(config, "key_frame_interval", @intCast(keyframe_interval));
+        _ = rav1e.rav1e_config_parse_int(config, "bitrate", @intCast(bitrate));
         _ = rav1e.rav1e_config_parse_int(config, "speed", 9);
         if (0 != rav1e.rav1e_config_parse(config, "low_latency", "true")) {
             log.err("Failed to config low_latency", .{});
         }
 
-        var encoder: ?*rav1e.RaContext = rav1e.rav1e_context_new(config);
+        const encoder: ?*rav1e.RaContext = rav1e.rav1e_context_new(config);
         if (encoder) |e| {
             self.encoder = e;
         } else {

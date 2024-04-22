@@ -48,7 +48,7 @@ fn encode(input_file: []const u8, output_file: []const u8) !void {
     defer ivf_writer.deinit();
 
     const yuv_size = width * height * 3 / 2;
-    var yuv_buf = try alc.alloc(u8, yuv_size);
+    const yuv_buf = try alc.alloc(u8, yuv_size);
     defer alc.free(yuv_buf);
 
     var av1enc = try AV1Enc.init(width, height, framerate_num, framerate_den, bitrate, keyframe_interval);

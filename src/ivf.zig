@@ -20,7 +20,7 @@ pub const IVFHeader = extern struct {
     unused: u32, // Reserved for future use (set to 0)
 };
 
-pub const IVFFrameHeader = struct {
+pub const IVFFrameHeader = extern struct {
     frame_size: u32, // Size of the frame data in bytes
     timestamp: u64, // Presentation timestamp of the frame in time units
 };
@@ -59,8 +59,8 @@ pub const IVFReader = struct {
     }
 
     pub fn readIVFFrameHeader(self: *Self, frame_header: *IVFFrameHeader) !void {
-        frame_header.frame_size = try self.reader.readIntLittle(u32);
-        frame_header.timestamp = try self.reader.readIntLittle(u64);
+        frame_header.frame_size = try self.reader.readInt(u32, .little);
+        frame_header.timestamp = try self.reader.readInt(u64, .little);
     }
 
     pub fn readFrame(self: *Self, frame: []u8) !usize {
@@ -95,7 +95,7 @@ pub const IVFWriter = struct {
             return error.IvfFormat;
         }
         // Assuming the host is little endian
-        try self.writer.writeAll(@ptrCast([*]const u8, header)[0..@sizeOf(IVFHeader)]);
+        try self.writer.writeAll(@as([*]const u8, @ptrCast(header))[0..@sizeOf(IVFHeader)]);
         return self;
     }
 
@@ -104,7 +104,7 @@ pub const IVFWriter = struct {
             // Not seekable. return silently.
             return;
         };
-        self.writer.writeIntLittle(u32, self.frame_count) catch {
+        self.writer.writeInt(u32, self.frame_count, .little) catch {
             return;
         };
         self.file.seekFromEnd(0) catch {
@@ -113,8 +113,8 @@ pub const IVFWriter = struct {
     }
 
     pub fn writeIVFFrame(self: *Self, frame: []const u8, timestamp: u64) !void {
-        try self.writer.writeIntLittle(u32, @truncate(u32, frame.len));
-        try self.writer.writeIntLittle(u64, timestamp);
+        try self.writer.writeInt(u32, @as(u32, @truncate(frame.len)), .little);
+        try self.writer.writeInt(u64, timestamp, .little);
         try self.writer.writeAll(frame);
         self.frame_count += 1;
     }
