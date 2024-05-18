@@ -1,6 +1,6 @@
 const std = @import("std");
 const log = std.log;
-const rav1e = @cImport(@cInclude("rav1e.h"));
+const rav1e = @cImport(@cInclude("rav1e/rav1e.h"));
 
 pub const AV1Enc = struct {
     width: u32,
